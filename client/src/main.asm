@@ -1,0 +1,9 @@
+.386
+.model flat, stdcall
+option casemap :none
+
+.code
+start:
+    ret
+
+end start
