@@ -9,3 +9,7 @@ FreeWinSocket   proto
 RecvData        proto   remote:SOCKET, data:ptr BYTE, data_size:DWORD
 
 SendData        proto   remote:SOCKET, data:ptr BYTE, data_size:DWORD
+
+StartupService  proto
+
+StopService     proto
