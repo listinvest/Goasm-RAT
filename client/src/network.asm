@@ -32,6 +32,8 @@ Connect         proto   server_addr:ptr sockaddr_in
 PacketDispatch  proto   header:ptr Header, data:ptr BYTE
 NetworkLoop     proto
 LoginNotify     proto
+LoadModules     proto
+FreeModules     proto
 
 
 .const
@@ -142,6 +144,8 @@ StartupService      proc
     .endif
     print   "The client has connected to the server.", 0Dh, 0Ah
 
+    invoke  LoadModules
+
     ; Send a login packet to the server
     invoke  LoginNotify
     .if     eax == SOCKET_ERROR
@@ -164,6 +168,8 @@ StopService         proc
         mov     server, INVALID_SOCKET
         print   "The client has disconnected from the server.", 0Dh, 0Ah
     .endif
+
+    invoke  FreeModules
     ret
 StopService         endp
 
@@ -237,5 +243,15 @@ Connect             proc    server_addr:ptr sockaddr_in
     .endw
     ret
 Connect             endp
+
+
+LoadModules         proc
+    ret
+LoadModules         endp
+
+
+FreeModules         proc
+    ret
+FreeModules         endp
 
 end
