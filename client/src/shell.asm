@@ -103,8 +103,11 @@ StopShell       endp
 OnShell         proc    remote:SOCKET, header:ptr Header, data:ptr BYTE
     local   @written:DWORD
 
+    print   "The client has received a request to execute a shell command.", 0Dh, 0Ah
+
     mov     eax, proc_info.hProcess
     .if     eax == NULL
+        print   "Failed to create the shell process.", 0Dh, 0Ah
         mov     eax, FALSE
         ret
     .endif
@@ -112,6 +115,7 @@ OnShell         proc    remote:SOCKET, header:ptr Header, data:ptr BYTE
     mov     eax, header
     mov     ebx, data
     .if     eax == NULL ||  ebx == NULL
+        print   "Failed to get the shell command.", 0Dh, 0Ah
         mov     eax, TRUE
         ret
     .endif
@@ -211,6 +215,9 @@ PeekPipe        proc    times:DWORD, got_size:ptr DWORD
     xor     ecx, ecx
     .while  ecx < times
         push    ecx
+        ; BUG:
+        ;   Sometimes `PeekNamedPipe` can not get data size from the pipe.
+        ;   But it returns `true`.
         invoke  PeekNamedPipe, read_pipe, NULL, 0, NULL, addr @remain, NULL
         .if     eax == FALSE
             jmp     _Exit
